@@ -1,14 +1,14 @@
 ---
 name: persona-review
 description: >
-  Code review of a commit or uncommitted changes through one or more personas:
-  Chad (correctness, tests, types, linting, bugs), Clive (performance, concurrency,
-  security, database), Jimmy (Clean Code, naming, code smells, refactoring) and
-  Poindexter (architecture, design, SOLID, trade-offs), or a shallow sweep of all four.
+  Code review of a commit, a branch, a pull request or uncommitted changes through one
+  or more personas: Chad (correctness, tests, types, linting, bugs), Clive (performance,
+  concurrency, security, database), Jimmy (Clean Code, naming, code smells, refactoring)
+  and Poindexter (architecture, design, SOLID, trade-offs), or a shallow sweep of all four.
   Use when the user asks for Chad's, Clive's, Jimmy's or Poindexter's review, a review
   of one of those concerns, a review from all reviewers ("review all"), or a code
-  review of their change.
-  Usage: /persona-review [personas or concerns] [commit-hash]
+  review of their change, a PR ("review PR 42") or a branch ("review the feature-x branch").
+  Usage: /persona-review [personas or concerns] [commit-hash | PR number | branch [against base]]
 ---
 
 A **persona review** looks at a change through one persona's lens, for a human reviewing their own code or someone else's. Each persona's criteria, voice and output format live in its own reference file, the single source of truth for that persona:
@@ -22,10 +22,24 @@ A **sweep** runs all four at reduced depth, to show which personas are worth run
 
 ## 1. Resolve the target
 
-- A commit hash: review `git show <hash>`.
-- Nothing given: review the uncommitted changes, `git diff --staged` and `git diff`.
+Resolve the target to a **diff command** and a **revision**, the ref at which to read more of a file than the diff shows. Take the first that matches:
 
-Done when the diff command is fixed and its output is non-empty. An empty diff or a ref that doesn't resolve stops here with a message to the user.
+- **A commit hash**: diff `git show <hash>`; revision `<hash>`.
+- **A PR or MR number** ("PR 42", "#42", "MR 42", "!42"): find the forge from the host of the `origin` URL in `git remote -v`.
+  - GitHub (`github.com`), with `gh` installed and `gh auth status` passing: diff `gh pr diff <n>`. Fetch the head with `git fetch origin pull/<n>/head`; the revision is the SHA from `git rev-parse FETCH_HEAD`. The title from `gh pr view <n> --json title` may label the report heading.
+  - GitLab (a host containing `gitlab`), with `glab` installed and `glab auth status` passing: diff `glab mr diff <n>`. Fetch the head with `git fetch origin merge-requests/<n>/head`; the revision as for GitHub. The title from `glab mr view <n>` may label the report heading.
+  - Any other remote, or the forge's CLI missing or not signed in: ask the user for the PR's branch (and its base, if not the default branch), then resolve it as a branch below.
+
+  The PR's description, linked issues and review threads are not input: the personas judge the code, and checking it against stated intent is a spec review's job.
+- **A branch** ("the feature-x branch", optionally "against develop"):
+  - Branch: the first of `<branch>` and `origin/<branch>` that `git rev-parse --verify --quiet <ref>^{commit}` resolves. If neither does, the branch may exist only on the remote: run `git fetch origin <branch>` and use the SHA from `git rev-parse FETCH_HEAD`.
+  - Base: the branch the user named, resolved the same way; otherwise the remote's default branch, `git symbolic-ref --short refs/remotes/origin/HEAD` (e.g. `origin/main`). If that ref is unset, take the name after `ref: refs/heads/` in `git ls-remote --symref origin HEAD` and use `origin/<name>`.
+  - Diff `git diff <base>...<branch>` (three dots, so the comparison is against the merge-base); the revision is `<branch>`.
+- **Nothing given**: diff `git diff --staged` and `git diff`; the revision is the working tree.
+
+Every target leaves the working tree and current branch as they are: `git fetch` and read-only commands only, never a checkout, switch, stash or reset. Read files at the revision with `git show <revision>:<path>`, or from disk when the target is the uncommitted changes.
+
+Done when the diff command and revision are fixed and the diff is non-empty. A ref or PR that doesn't resolve, or an empty diff, stops here with a message to the user, before any persona runs. Label the report heading with the target, e.g. `PR #42: <title>` or `feature-x against origin/main`.
 
 ## 2. Route to personas
 
@@ -51,7 +65,7 @@ Read that persona's reference file and review the diff in this context, as that 
 
 ### Two or three personas: full depth each
 
-Where the agent can start sub-agents, start one per persona, in parallel, so each review has a context of its own; otherwise run them one after another in this context, each at full depth. Brief each sub-agent with the diff command from step 1 and the absolute path of its reference file, telling it to read the file, review the diff as that persona against every criterion, and return the report in the persona's output format.
+Where the agent can start sub-agents, start one per persona, in parallel, so each review has a context of its own; otherwise run them one after another in this context, each at full depth. Brief each sub-agent with the diff command and revision from step 1 and the absolute path of its reference file, telling it to read the file, review the diff as that persona against every criterion, read any more of a file only at the revision (leaving the working tree as it is), and return the report in the persona's output format.
 
 Present each report under the persona's name, in the order Chad, Clive, Jimmy, Poindexter.
 
