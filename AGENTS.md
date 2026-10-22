@@ -15,3 +15,17 @@ Agent Skills that must work across vendors (Claude Code, Codex, Gemini CLI, Copi
 
 ## Before committing
 Run `scripts/validate.sh`. CI runs the same check.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in this repo's GitHub Issues, via `gh`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default label names for all five triage roles. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one root `GLOSSARY.md` and `docs/adr/`. See `docs/agents/domain.md`.
