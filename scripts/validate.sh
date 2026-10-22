@@ -19,10 +19,32 @@ else
   dirs=("$repo_root"/skills/*/)
 fi
 
+tmp_root="$(mktemp -d)"
+trap 'rm -rf "$tmp_root"' EXIT
+
+frontmatter() {
+  awk 'NR == 1 && $0 == "---" { inside = 1; next } inside && $0 == "---" { exit } inside' "$1"
+}
+
 failed=0
 for dir in "${dirs[@]}"; do
   dir="${dir%/}"
-  if ! uvx -q --from "$SKILLS_REF_SOURCE" skills-ref validate "$dir"; then
+  target="$dir"
+  # disable-model-invocation is the one vendor key allowed (see AGENTS.md). skills-ref
+  # rejects it, so validate a copy without it; the copy keeps the folder name because
+  # skills-ref checks it against `name`.
+  if frontmatter "$dir/SKILL.md" | grep -q '^disable-model-invocation:'; then
+    if ! frontmatter "$dir/SKILL.md" | grep -q '^compatibility:'; then
+      echo "error: $dir uses disable-model-invocation without a compatibility field" >&2
+      failed=1
+      continue
+    fi
+    target="$tmp_root/$(basename "$dir")"
+    cp -R "$dir" "$target"
+    awk 'NR == 1 { inside = ($0 == "---") } inside && NR > 1 && $0 == "---" { inside = 0 }
+         !(inside && /^disable-model-invocation:/)' "$dir/SKILL.md" > "$target/SKILL.md"
+  fi
+  if ! uvx -q --from "$SKILLS_REF_SOURCE" skills-ref validate "$target"; then
     failed=1
     continue
   fi
