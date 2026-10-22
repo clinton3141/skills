@@ -37,7 +37,7 @@ The trackers:
 Show the user, in one message:
 
 - The tracker you inferred, and why.
-- The label mapping: the five defaults from [triage-labels.md](references/triage-labels.md), with any existing labels you matched to a role. Omit this when `triage` isn't installed.
+- The label mapping: the defaults from [triage-labels.md](references/triage-labels.md), with any existing labels you matched to a role. Omit this when `triage` isn't installed.
 - The domain-doc layout, and the signals behind it when it is multi-context.
 - The file you will edit: `AGENTS.md` if it exists, else `CLAUDE.md`. If neither exists, ask which to create. When `CLAUDE.md` only imports `AGENTS.md` (`@AGENTS.md`), edit `AGENTS.md`.
 - The `## Agent skills` block from step 3.
