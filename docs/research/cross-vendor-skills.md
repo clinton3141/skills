@@ -49,4 +49,4 @@ Claude Code's documented locations are `~/.claude/skills/`, `.claude/skills/` (f
 3. **Symlinks from a clone.** Best for authoring, because edits are live in every agent.
 
 ## Decision
-Keep skills in `skills/<name>/` with spec-only frontmatter, enforced by `skills-ref` in CI. Publish through both the skills CLI and a Claude Code marketplace from the same repo. Use `scripts/link-skills.sh` on machines where skills are edited.
+Keep skills in `skills/<name>/` with spec-only frontmatter, enforced by `skills-ref` in CI. Publish through the skills CLI only. A Claude Code plugin was tried and dropped: plugin skills are namespaced, so a bare name such as `code-review` resolves to Claude Code's built-in rather than the plugin's skill, whereas personal and project skills replace the built-in (tested 2026-10-22). Use `scripts/link-skills.sh` on machines where skills are edited.
