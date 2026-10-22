@@ -13,10 +13,10 @@ description: >
 
 A **persona review** looks at a change through one persona's lens, for a human reviewing their own code or someone else's. Each persona's criteria, voice and output format live in its own reference file, the single source of truth for that persona:
 
-- **Chad** (correctness and testing): [`references/chad.md`](references/chad.md)
-- **Clive** (performance and security): [`references/clive.md`](references/clive.md)
-- **Jimmy** (clean code): [`references/jimmy.md`](references/jimmy.md)
-- **Poindexter** (architecture): [`references/poindexter.md`](references/poindexter.md)
+- **Chad**: [`references/chad.md`](references/chad.md)
+- **Clive**: [`references/clive.md`](references/clive.md)
+- **Jimmy**: [`references/jimmy.md`](references/jimmy.md)
+- **Poindexter**: [`references/poindexter.md`](references/poindexter.md)
 
 A **sweep** runs all four at reduced depth, to show which personas are worth running in full.
 
@@ -37,7 +37,7 @@ Take the first rule that matches:
    - Performance, complexity, concurrency, security, database → Clive
    - Naming, code smells, refactoring, Clean Code → Jimmy
    - Design, architecture, SOLID, trade-offs → Poindexter
-3. **Otherwise** (a bare "review this"): ask the user which personas to run, offering "all four (sweep)" first, then each persona with its concern.
+3. **Otherwise** (a bare "review this"): ask the user which personas to run, offering "all four (sweep)" first, then each persona with the concerns it owns from rule 2.
 
 Whenever the set comes to all four ("review all", "all reviewers"), it is a sweep.
 
@@ -51,9 +51,9 @@ Read that persona's reference file and review the diff in this context, as that 
 
 ### Two or three personas: full depth each
 
-Give each persona a context of its own. Where the agent can start sub-agents, start one per persona, in parallel; otherwise run them one after another. Brief each with the diff command from step 1 and the absolute path of its reference file, telling it to read the file, review the diff as that persona against every criterion, and return the report in the persona's output format.
+Where the agent can start sub-agents, start one per persona, in parallel, so each review has a context of its own; otherwise run them one after another in this context, each at full depth. Brief each sub-agent with the diff command from step 1 and the absolute path of its reference file, telling it to read the file, review the diff as that persona against every criterion, and return the report in the persona's output format.
 
-Present each report under the persona's name, in the order the user named them.
+Present each report under the persona's name, in the order Chad, Clive, Jimmy, Poindexter.
 
 ### All four: a sweep
 
