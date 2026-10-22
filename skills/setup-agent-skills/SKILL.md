@@ -1,6 +1,6 @@
 ---
 name: setup-agent-skills
-description: "Configure this repo for the engineering skills: its issue tracker (GitHub, local markdown, or another tool), triage labels, and domain-doc layout. Run once per repo before to-spec, to-tickets, triage, code-review or implement-issues, or to switch trackers."
+description: "Configure this repo for the engineering skills: its issue tracker (GitHub, local markdown, or another tool), triage labels, and domain-doc layout. Run once per repo before to-spec, to-tickets, triage, spec-review or implement-issues, or to switch trackers."
 compatibility: Coding agents only (uses disable-model-invocation; not for claude.ai or the Skills API).
 disable-model-invocation: true
 ---
