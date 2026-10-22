@@ -5,7 +5,7 @@ compatibility: Coding agents only (uses disable-model-invocation; not for claude
 disable-model-invocation: true
 ---
 
-Run `~/.claude/skills/implement-issues/SKILL.md` as the orchestrator, with the changes below. The user is **AFK**: every question they would otherwise answer mid-run is asked once, at the start, and the run then carries on alone until it is done or blocked.
+Run `../implement-issues/SKILL.md` (relative to this skill's folder) as the orchestrator, with the changes below. The user is **AFK**: every question they would otherwise answer mid-run is asked once, at the start, and the run then carries on alone until it is done or blocked.
 
 The repo's own docs (its `CLAUDE.md` and the docs it links) say how its checks, merges and deploys work. Where they name something below, such as the definition of done, the merge style or what a merge deploys, follow them.
 

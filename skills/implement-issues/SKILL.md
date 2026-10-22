@@ -32,7 +32,7 @@ Show the user the plan as a table (wave, issues, branch, base, blocked by) and w
 
 ## 3. Dispatch
 
-Spawn every unblocked worker in one message, each with the Agent tool, `isolation: "worktree"`, running in the background. Each worker starts cold, so its prompt carries everything it needs; fill in this brief:
+Spawn every unblocked worker in one message, each with the Agent tool, `isolation: "worktree"`, running in the background. Each worker starts cold, so its prompt carries everything it needs; fill in this brief. `<skills dir>` is the absolute path of the folder holding this skill's folder: the sibling skills live there, whichever installer put them in place.
 
 > You are implementing issue #<number> in `<repo path>`, alone, in your own worktree. Other workers are implementing other issues in parallel; touch only what this issue needs, and note anything out of scope in the PR body instead of fixing it. The other workers share your temp and scratchpad directories, so write any scratch file (the PR body included) inside your worktree or under a name containing `<number>`, never at a fixed shared path.
 >
@@ -43,7 +43,7 @@ Spawn every unblocked worker in one message, each with the Agent tool, `isolatio
 > For a group, make one commit per issue, each ending `Closes #<number>`.
 >
 > 1. Create your branch: `git fetch origin && git switch -c <branch> origin/<base>`.
-> 2. Read `~/.claude/skills/implement/SKILL.md` and follow it for this issue. Each skill it names lives at `~/.claude/skills/<name>/SKILL.md`; read that file and follow it. For the code review, run both axes (Standards, then Spec) yourself, one after the other, against the fixed point `origin/<base>`.
+> 2. Read `<skills dir>/implement/SKILL.md` and follow it for this issue. Each skill it names lives at `<skills dir>/<name>/SKILL.md`; read that file and follow it. For the code review, run both axes (Standards, then Spec) yourself, one after the other, against the fixed point `origin/<base>`.
 > 3. You are done when: every item in the issue's acceptance criteria is met; the repo's definition of done passes (find it from `CLAUDE.md` / `AGENTS.md` and the docs they point to), run and seen passing, not assumed; and every review finding is fixed or answered in the PR body.
 > 4. Push (`git push -u origin <branch>`) and open the PR with `gh pr create --base <base> --head <branch>`. Match the repo's recent PR titles and bodies (`gh pr list --state merged --limit 5 --json title,body`); the body opens with `Closes #<number>.` (one line per issue for a group)
 > 5. If the issue is ambiguous in a way only a human can settle, stop before step 4 and report the question instead.
