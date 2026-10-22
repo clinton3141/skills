@@ -34,13 +34,14 @@ Two **category** roles:
 - `bug`: something is broken
 - `enhancement`: new feature or improvement
 
-Five **state** roles:
+Six **state** roles:
 
 - `needs-triage`: maintainer needs to evaluate
 - `needs-info`: waiting on reporter for more information
 - `ready-for-agent`: fully specified, ready for an AFK agent
 - `ready-for-human`: needs human implementation
 - `wontfix`: will not be actioned
+- `later`: valid, but parked; not being worked on now. Unlike `wontfix`, the issue stays open
 
 For a PR, the same states read against the attached code: `ready-for-agent` means a brief is attached and an agent should take the next step on the diff; `ready-for-human` means it's ready for a human to merge.
 
@@ -48,7 +49,7 @@ Every triaged issue should carry exactly one category role and one state role. I
 
 These are canonical role names. The actual label strings used in the issue tracker may differ. The mapping should have been provided to you. If not, tell the user to run `/setup-agent-skills`.
 
-State transitions: an unlabeled issue normally goes to `needs-triage` first; from there it moves to `needs-info`, `ready-for-agent`, `ready-for-human`, or `wontfix`. `needs-info` returns to `needs-triage` once the reporter replies. The maintainer can override at any time; flag transitions that look unusual and ask before proceeding.
+State transitions: an unlabeled issue normally goes to `needs-triage` first; from there it moves to `needs-info`, `ready-for-agent`, `ready-for-human`, or `wontfix`. `needs-info` returns to `needs-triage` once the reporter replies. Any open state can move to `later`, since parking is about timing, not progress. Leaving `later` always returns to `needs-triage`, never straight back to the previous state, because any existing brief may have gone stale. The maintainer can override at any time; flag transitions that look unusual and ask before proceeding.
 
 ## Invocation
 
@@ -68,6 +69,8 @@ Query the issue tracker and present three buckets, oldest first:
 3. **`needs-info` with reporter activity since the last triage notes**: needs re-evaluation.
 
 When PRs are in scope, include external PRs in these buckets and tag each line `[PR]` or `[issue]`. Discovery surfaces only *external* PRs (the tracker config defines who counts as external), so a collaborator's in-flight PR is not triage work. This filter is discovery-only; an explicitly named PR is always triaged regardless of author.
+
+Leave `later` issues out of every bucket; instead show one count line (e.g. "3 parked in `later`") so they aren't forgotten.
 
 Show counts and a one-line summary per item. Let the maintainer pick.
 
@@ -90,6 +93,7 @@ Show counts and a one-line summary per item. Let the maintainer pick.
      - **Rejected (bug)**: give a polite explanation, then close.
      - **Rejected (enhancement)**: write to `.out-of-scope/`, link to it from a comment, then close ([out-of-scope.md](references/out-of-scope.md)).
    - `needs-triage`: apply the role. Optional comment if there's partial progress.
+   - `later`: apply the role and leave the issue open. Optional comment saying why it was parked.
 
 ## Quick state override
 

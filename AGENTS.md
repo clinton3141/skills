@@ -24,7 +24,7 @@ Issues are tracked in this repo's GitHub Issues, via `gh`. See `docs/agents/issu
 
 ### Triage labels
 
-Default label names for all five triage roles. See `docs/agents/triage-labels.md`.
+Default label names for all triage roles. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
