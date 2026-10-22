@@ -41,7 +41,7 @@ Six **state** roles:
 - `ready-for-agent`: fully specified, ready for an AFK agent
 - `ready-for-human`: needs human implementation
 - `wontfix`: will not be actioned
-- `later`: valid, but parked; not being worked on now. Unlike `wontfix`, the issue stays open
+- `later`: valid but parked; not being worked on now (unlike `wontfix`, the issue stays open)
 
 For a PR, the same states read against the attached code: `ready-for-agent` means a brief is attached and an agent should take the next step on the diff; `ready-for-human` means it's ready for a human to merge.
 
