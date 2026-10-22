@@ -25,21 +25,21 @@ A **sweep** runs all four at reduced depth, to show which personas are worth run
 Resolve the target to a **diff command** and a **revision**, the ref at which to read more of a file than the diff shows. Take the first that matches:
 
 - **A commit hash**: diff `git show <hash>`; revision `<hash>`.
-- **A PR or MR number** ("PR 42", "#42", "MR 42"): find the forge from the `origin` URL in `git remote -v`.
-  - GitHub, with `gh` installed and `gh auth status` passing: diff `gh pr diff <n>`. Fetch the head with `git fetch origin pull/<n>/head`; the revision is the SHA from `git rev-parse FETCH_HEAD`. The title from `gh pr view <n> --json title` may label the report heading.
-  - GitLab, with `glab` installed and `glab auth status` passing: diff `glab mr diff <n>`. Fetch the head with `git fetch origin merge-requests/<n>/head`; the revision as for GitHub. The title from `glab mr view <n>` may label the report heading.
+- **A PR or MR number** ("PR 42", "#42", "MR 42", "!42"): find the forge from the host of the `origin` URL in `git remote -v`.
+  - GitHub (`github.com`), with `gh` installed and `gh auth status` passing: diff `gh pr diff <n>`. Fetch the head with `git fetch origin pull/<n>/head`; the revision is the SHA from `git rev-parse FETCH_HEAD`. The title from `gh pr view <n> --json title` may label the report heading.
+  - GitLab (a host containing `gitlab`), with `glab` installed and `glab auth status` passing: diff `glab mr diff <n>`. Fetch the head with `git fetch origin merge-requests/<n>/head`; the revision as for GitHub. The title from `glab mr view <n>` may label the report heading.
   - Any other remote, or the forge's CLI missing or not signed in: ask the user for the PR's branch (and its base, if not the default branch), then resolve it as a branch below.
 
   The PR's description, linked issues and review threads are not input: the personas judge the code, and checking it against stated intent is a spec review's job.
 - **A branch** ("the feature-x branch", optionally "against develop"):
-  - Branch: the first of `<branch>` and `origin/<branch>` that `git rev-parse --verify --quiet <ref>^{commit}` resolves. If neither does, run `git fetch origin <branch>` and try `origin/<branch>` again, which covers a branch that exists only on the remote.
+  - Branch: the first of `<branch>` and `origin/<branch>` that `git rev-parse --verify --quiet <ref>^{commit}` resolves. If neither does, the branch may exist only on the remote: run `git fetch origin <branch>` and use the SHA from `git rev-parse FETCH_HEAD`.
   - Base: the branch the user named, resolved the same way; otherwise the remote's default branch, `git symbolic-ref --short refs/remotes/origin/HEAD` (e.g. `origin/main`). If that ref is unset, take the name after `ref: refs/heads/` in `git ls-remote --symref origin HEAD` and use `origin/<name>`.
   - Diff `git diff <base>...<branch>` (three dots, so the comparison is against the merge-base); the revision is `<branch>`.
 - **Nothing given**: diff `git diff --staged` and `git diff`; the revision is the working tree.
 
-Every target leaves the working tree and current branch as they are: `git fetch` and read-only commands only, never a checkout, switch, stash or reset. Read files at the revision with `git show <revision>:<path>`.
+Every target leaves the working tree and current branch as they are: `git fetch` and read-only commands only, never a checkout, switch, stash or reset. Read files at the revision with `git show <revision>:<path>`, or from disk when the target is the uncommitted changes.
 
-Done when the diff command and revision are fixed and the diff is non-empty. A ref or PR that doesn't resolve, or an empty diff, stops here with a message to the user, before any persona runs. Label the report heading with the target (`PR #42: <title>`, `feature-x against origin/main`).
+Done when the diff command and revision are fixed and the diff is non-empty. A ref or PR that doesn't resolve, or an empty diff, stops here with a message to the user, before any persona runs. Label the report heading with the target, e.g. `PR #42: <title>` or `feature-x against origin/main`.
 
 ## 2. Route to personas
 
