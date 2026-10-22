@@ -1,6 +1,6 @@
 ---
 name: spec-review
-description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Spec (does the code match what the originating issue/spec asked for?) and Standards (does the code follow this repo's documented coding standards?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants a branch or PR checked against its ticket, spec or coding standards, or asks to \"review since X\"."
+description: "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes: Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants a branch, PR or work-in-progress changes checked against their ticket, spec or coding standards."
 ---
 
 <!--

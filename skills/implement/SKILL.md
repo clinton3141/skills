@@ -14,7 +14,7 @@ Implement the work described by the user in the spec or tickets.
 
 If the user passes a ticket reference, fetch it from the issue tracker and state its title before starting. If the reference is ambiguous, ask.
 
-Where possible, read `../tdd/SKILL.md` and follow it at pre-agreed seams.
+Where possible, read `../tdd/SKILL.md` (relative to this skill's folder) and follow it at pre-agreed seams.
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.
 

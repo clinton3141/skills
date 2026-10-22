@@ -42,7 +42,7 @@ Claude Code's documented locations are `~/.claude/skills/`, `.claude/skills/` (f
    - Installs into roughly 70 agents and picks the right directory for each.
    - [Discovery](https://raw.githubusercontent.com/vercel-labs/skills/main/docs/creating-skills.md) covers a root `SKILL.md`; `skills/` walked up to 3 levels deep (also `.curated/`, `.experimental/` and `.system/`); agent dirs such as `.agents/skills/` and `.claude/skills/`; and skills declared in `.claude-plugin/marketplace.json` or `plugin.json`.
    - `npx skills check` and `npx skills update` handle updates. `metadata.internal: true` hides a skill unless `INSTALL_INTERNAL_SKILLS=1` is set.
-2. **Claude Code plugin marketplace** ([marketplace reference](https://code.claude.com/docs/en/plugins/marketplace-reference)).
+2. **Claude Code plugin marketplace** (tried and dropped; see Decision) ([marketplace reference](https://code.claude.com/docs/en/plugins/marketplace-reference)).
    - `.claude-plugin/marketplace.json` needs `name`, `owner.name` and `plugins[]`. Each entry needs a `name` and a `source`.
    - `"source": "."` makes the repo root the plugin. With no `plugin.json`, the entry is the manifest, and skills are discovered from `<plugin>/skills/`.
    - Plugin skills are namespaced as `/<plugin>:<skill>`.
