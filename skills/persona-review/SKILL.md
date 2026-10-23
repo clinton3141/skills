@@ -32,14 +32,16 @@ Resolve the target to a **diff command** and a **revision**, the ref at which to
 
   The PR's description, linked issues and review threads are not input: the personas judge the code, and checking it against stated intent is a spec review's job.
 - **A branch** ("the feature-x branch", optionally "against develop"):
-  - Branch: the first of `<branch>` and `origin/<branch>` that `git rev-parse --verify --quiet <ref>^{commit}` resolves. If neither does, the branch may exist only on the remote: run `git fetch origin <branch>` and use the SHA from `git rev-parse FETCH_HEAD`.
+  - Branch: refresh the remote copy with `git fetch origin +refs/heads/<branch>:refs/remotes/origin/<branch>` (the explicit refspec updates `origin/<branch>` even where the clone's configured refspecs would not). If that reports `couldn't find remote ref`, the branch is not on the remote: treat `origin/<branch>` as absent. Any other fetch failure (e.g. offline) carries on with the refs as they are, and the report heading says `origin` was not refreshed. Then, of `<branch>` and `origin/<branch>`, keep those that `git rev-parse --verify --quiet <ref>^{commit}` resolves:
+    - Only one: review it. Both, at the same commit: review `<branch>`.
+    - Both, at different commits: stop before any persona runs and ask the user which to review, stating how they differ from `git rev-list --left-right --count <branch>...origin/<branch>` (left: commits only the local copy has, so ahead; right: behind), e.g. "local `feature-x` is 3 behind and 1 ahead of `origin/feature-x`". Review the one chosen.
   - Base: the branch the user named, resolved the same way; otherwise the remote's default branch, `git symbolic-ref --short refs/remotes/origin/HEAD` (e.g. `origin/main`). If that ref is unset, take the name after `ref: refs/heads/` in `git ls-remote --symref origin HEAD` and use `origin/<name>`.
-  - Diff `git diff <base>...<branch>` (three dots, so the comparison is against the merge-base); the revision is `<branch>`.
+  - Diff `git diff <base>...<branch>` (three dots, so the comparison is against the merge-base), with `<branch>` and `<base>` the refs chosen; the revision is the chosen `<branch>`.
 - **Nothing given**: diff `git diff --staged` and `git diff`; the revision is the working tree.
 
 Every target leaves the working tree and current branch as they are: `git fetch` and read-only commands only, never a checkout, switch, stash or reset. Read files at the revision with `git show <revision>:<path>`, or from disk when the target is the uncommitted changes.
 
-Done when the diff command and revision are fixed and the diff is non-empty. A ref or PR that doesn't resolve, or an empty diff, stops here with a message to the user, before any persona runs. Label the report heading with the target, e.g. `PR #42: <title>` or `feature-x against origin/main`.
+Done when the diff command and revision are fixed and the diff is non-empty. A ref or PR that doesn't resolve, or an empty diff, stops here with a message to the user, before any persona runs. Label the report heading with the target, naming the refs actually reviewed, e.g. `PR #42: <title>` or `origin/feature-x against origin/main`.
 
 ## 2. Route to personas
 
