@@ -26,10 +26,49 @@ frontmatter() {
   awk 'NR == 1 && $0 == "---" { inside = 1; next } inside && $0 == "---" { exit } inside' "$1"
 }
 
+manual_only() {
+  frontmatter "$1" | grep -q '^disable-model-invocation:[[:space:]]*true'
+}
+
+# Every skill in the repo, and the manual-only ones among them, for the
+# cross-skill checks below (which run on each validated skill's Markdown).
+all_skills=()
+manual_skills=()
+for skill_md in "$repo_root"/skills/*/SKILL.md; do
+  name="$(basename "$(dirname "$skill_md")")"
+  all_skills+=("$name")
+  if manual_only "$skill_md"; then manual_skills+=("$name"); fi
+done
+
+# A skill must reach another skill through the Skill tool, never by reading its
+# file, and must never load a manual-only skill (see AGENTS.md).
+check_cross_skill() {
+  local dir="$1" own other md bad=0
+  own="$(basename "$dir")"
+  while IFS= read -r -d '' md; do
+    for other in "${all_skills[@]}"; do
+      [ "$other" = "$own" ] && continue
+      if grep -nE "/${other}/SKILL\.md" "$md" >/dev/null; then
+        grep -nE "/${other}/SKILL\.md" "$md" | sed "s|^|error: $md:|; s|\$| (reads skill '$other' by path; call the Skill tool instead)|" >&2
+        bad=1
+      fi
+    done
+    for other in "${manual_skills[@]}"; do
+      [ "$other" = "$own" ] && continue
+      if grep -nE "Skill tool.*\`${other}\`" "$md" >/dev/null; then
+        grep -nE "Skill tool.*\`${other}\`" "$md" | sed "s|^|error: $md:|; s|\$| (loads manual-only skill '$other'; see AGENTS.md)|" >&2
+        bad=1
+      fi
+    done
+  done < <(find "$dir" -name '*.md' -print0)
+  return "$bad"
+}
+
 failed=0
 for dir in "${dirs[@]}"; do
   dir="${dir%/}"
   target="$dir"
+  check_cross_skill "$dir" || failed=1
   # disable-model-invocation is the one vendor key allowed (see AGENTS.md). skills-ref
   # rejects it, so validate a copy without it; the copy keeps the folder name because
   # skills-ref checks it against `name`.

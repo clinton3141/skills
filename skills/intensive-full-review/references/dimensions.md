@@ -25,7 +25,7 @@ Cite the measure (line count, nesting depth, number of branches or parameters) a
 
 ## Code smells
 
-The Fowler baseline (_Refactoring_, ch. 3): paste the smell baseline from step 3 of `../spec-review/SKILL.md` (relative to this skill's folder) here when briefing, since that is its single source of truth. Each smell is a judgement call, labelled as "possible <smell>", and a house rule that endorses the pattern suppresses it.
+The Fowler baseline (_Refactoring_, ch. 3): call the Skill tool with `code-smells` and paste its baseline here when briefing, since that skill is its single source of truth. Each smell is a judgement call, labelled as "possible <smell>", and a house rule that endorses the pattern suppresses it.
 
 Add the whole-codebase smells a diff review cannot see: **Dead Code** (unexported and uncalled, or behind a flag that is always one value), **Lazy Element**, **Global Data**, **Mutable Data** shared across modules, **Large Class / Module**, **Loops** that a pipeline would state more plainly.
 
