@@ -13,6 +13,22 @@ The issue tracker workflow is in `docs/agents/issue-tracker.md`; read it before 
 
 The run is **interactive** unless the invocation's arguments include the word `afk` (e.g. `/implement-issues afk 12 13`). Only that word turns on AFK mode: never infer it from anything else, such as the user saying they are stepping away, a handoff file, or an earlier run. In AFK mode, follow the steps below with the changes in [AFK mode](#afk-mode); everything else is the same.
 
+## Before step 1: check commit signing
+
+In both modes. A worker is a subagent with no terminal, so if its `git commit` needs a passphrase for the signing key, the commit blocks for good, with the work staged and nothing committed.
+
+If `git config --get commit.gpgsign` prints `true` in the main checkout, make a probe signature:
+
+```sh
+git commit-tree -S -m probe $(git hash-object -t tree /dev/null) </dev/null
+```
+
+It works with every signing format and creates only a commit that nothing points to. Let it run for about 10 seconds at most (use your tool's timeout, or run it in the background and kill it). A non-zero exit or running out of time is a failure.
+
+When the probe fails, tell the user to load the signing key in a separate terminal (e.g. `ssh-add`, or their GPG agent), not through the agent's `!` shell: that has no terminal, and the passphrase prompt fails there with "incorrect passphrase". Then run the probe again. Don't go on until it passes, and don't offer to commit unsigned.
+
+Done when the probe passes, or `commit.gpgsign` isn't `true`.
+
 ## 1. Resolve the issues
 
 The user's description may be issue numbers, a label, a milestone, a map issue whose children are the work, or prose naming the work. Turn it into a list of issues and fetch each one in full (body, comments, labels, blockers).
@@ -46,6 +62,8 @@ Spawn every unblocked worker in one message, each with the Agent tool, `isolatio
 >
 > For a group, make one commit per issue, each ending `Closes #<number>`.
 >
+> If a `git commit` is still running after about 30 seconds, check with `ps` what it is waiting on. If it's the signing program (`ssh-keygen -Y sign`, `gpg`, or whatever `gpg.<format>.program` names), kill the commit with a plain `kill` (not `-9`, so git removes its `index.lock`), leave the work staged, and report a signing stall. Never disable signing. If something else is running, it's a hook: keep waiting.
+>
 > 1. Create your branch: `git fetch origin && git switch -c <branch> origin/<base>`.
 > 2. Implement the issue test-first: call the Skill tool with `tdd` and work at the seams the issue names. Run typechecking and single test files as you go, and the full test suite at the end. Commit to your branch.
 > 3. Review: call the Skill tool with `spec-review`, but run both axes (Standards, then Spec) yourself, one after the other, against the fixed point `origin/<base>`, rather than spawning sub-agents.
@@ -53,7 +71,7 @@ Spawn every unblocked worker in one message, each with the Agent tool, `isolatio
 > 5. Push (`git push -u origin <branch>`) and open the PR with `gh pr create --base <base> --head <branch>`. Match the repo's recent PR titles and bodies (`gh pr list --state merged --limit 5 --json title,body`); the body opens with `Closes #<number>.` (one line per issue for a group)
 > 6. If the issue is ambiguous in a way only a human can settle, stop before step 5 and report the question instead.
 >
-> Reply with: the PR URL (or the blocking question), the checks you ran and their results, and anything left unresolved. Under 200 words.
+> Reply with: the PR URL (or the blocking question, or the signing stall), the checks you ran and their results, and anything left unresolved. Under 200 words.
 
 ## 4. Verify each worker
 
@@ -65,6 +83,8 @@ A worker's report is a claim. As each one returns, check it against GitHub:
 - The report names the checks it ran and they passed.
 
 A worker that falls short (no PR, red checks, an unmet acceptance item, a skipped check) gets a follow-up through SendMessage, naming exactly what is missing, so it keeps its context. A worker with a human-only question: put the question to the user, then relay the answer the same way.
+
+A worker that reports a signing stall: tell the user to load the signing key in a separate terminal, as in [check commit signing](#before-step-1-check-commit-signing). Keep the other workers going, and once the user confirms the key is loaded, resume the stalled worker with `SendMessage` to commit and carry on.
 
 When a PR lands, dispatch any worker that was waiting on it (step 3).
 
@@ -88,12 +108,12 @@ The repo's own docs (its `CLAUDE.md` and the docs it links) say how its checks, 
 
 ### Before step 1: settle the questions
 
-Ask in one `AskUserQuestion` call, leaving out anything the invocation already answers:
+Once the [signing check](#before-step-1-check-commit-signing) passes, ask in one `AskUserQuestion` call, leaving out anything the invocation already answers:
 
 - **Model** for the workers. A handoff from an earlier run may name one; still confirm it.
 - **Landing**: merge each PR once it is verified, or open PRs and stop.
 
-Done when both are answered. From here the only questions that go to the user are ones only a human can settle (a worker's spec question, two PRs that contradict each other); everything else is decided by the skill, the repo's docs or a stated assumption.
+Done when both are answered. From here the only questions that go to the user are ones only a human can settle (a worker's spec question or signing stall, two PRs that contradict each other); everything else is decided by the skill, the repo's docs or a stated assumption.
 
 ### Step 2: plan without waiting
 
